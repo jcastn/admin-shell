@@ -2,7 +2,7 @@
 Des nouvelles commandes Linux pour les admins réseau, certaines ont besoin de clés d'API (VirusTotal et AbuseIPDB)
 
 
-Liste des commandes : 
+## Liste des commandes
 - `net-check` : Affiche un résumé de la config réseau (interface, adresse MAC, adresse IP publique et locale, passerelle, domaine, dns)
 - `sys-check` : Affiche un résumé de l'état du système
 - `net-diag` : Test de la connectivité vers différentes destinations (adresse passerelle, serveurs DNS, URLs)
@@ -11,8 +11,9 @@ Liste des commandes :
 - `check ip` : Envoi d'une IP sur AbuseIPDB afin de vérifier la confiance qui lui est accordée et à quoi sert-elle
 - `upbash` : Prise en compte des modifications faites aux fichiers des commandes. 
 
+---
 
-Pour faire fonctionner le projet :
+## Pour faire fonctionner le projet
 - les clés d'API doivent être ajoutés dans le fichier `~/.bashrc` avec :
     - `export API_KEY_VIRUSTOTAL="xxxxxxxxx"`
     - `export API_KEY_ABUSEIP="xxxxxxxxx"`
