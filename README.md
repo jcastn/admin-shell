@@ -1,5 +1,7 @@
 # admin-shell
-Des nouvelles commandes Linux pour les admins réseau, certaines ont besoin de clés d'API (VirusTotal et AbuseIPDB)
+Le but de ce projet est de créer de nouvelles commandes Linux pour faciliter la vie des admins réseau. 
+
+Elles ont été codées en Bash, et certaines d’entre elles utilisent des clés d’API pour accéder à des services externes tels que VirusTotal et AbuseIPDB.
 
 
 ## Liste des commandes
@@ -18,8 +20,7 @@ Des nouvelles commandes Linux pour les admins réseau, certaines ont besoin de c
     - `export API_KEY_VIRUSTOTAL="xxxxxxxxx"`
     - `export API_KEY_ABUSEIP="xxxxxxxxx"`
 - le fichier `commands.sh` doit être sauvegardé à un emplacement proche de la racine (par exemple `/scripts`)
-- le chemin du fichier commands.sh doit être ajouté à la source (~/.bashrc) avec :
-    `source /scripts/commands.sh`
+- le chemin du fichier commands.sh doit être ajouté à la source (~/.bashrc) avec : `source /scripts/commands.sh`
 - avant la 1ère utilisation, on lance la commande `source /root/.bashrc`.
 - La prise en compte des modifications faites au fichier `commands.sh` se fait via la commande `upbash`.
 
