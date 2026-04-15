@@ -10,7 +10,9 @@ Elles ont été codées en Bash, et certaines d’entre elles utilisent des clé
 - `net-diag` : Test de la connectivité vers différentes destinations (adresse passerelle, serveurs DNS, URLs)
 - `net-edit` : Modification de la config IP (domaine, dns, état dhcp)
 - `check [file|hash]` : Envoi de fichiers ou de hash sur la plateforme VirusTotal afin de vérifier qu'ils ne comportent pas de virus.
-- `check ip` : Envoi d'une IP sur AbuseIPDB afin de vérifier la confiance qui lui est accordée et à quoi sert-elle
+- `check ip` : Envoi d'une IP sur AbuseIPDB afin de vérifier la confiance qui lui est accordée et à quoi sert-elle.
+- `backup [create|restore]` : Création (ou restauration) de la backup horodatée d'un fichier/dossier dans une archive .bak dans le dossier /backups.
+- `sec-audit-ssh` : Audit de la sécurité du protocole SSH selon différents critères (tels que le port, l'utilisation d'une clé publique, le root login...).
 - `upbash` : Prise en compte des modifications faites aux fichiers des commandes. 
 
 ---
