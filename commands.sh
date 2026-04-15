@@ -58,7 +58,7 @@ function net-diag() {
         local gateway=$(ip route | grep default | awk '{print $3}')
         declare -a hosts_gateway=($gateway)
         declare -a hosts_dns=("8.8.8.8" "1.1.1.1")
-        declare -a hosts_url=("youtube.com" "carrefour.fr" "google.com")
+        declare -a hosts_url=("youtube.com" "carrefour.fr" "netacad.com" "google.com")
         declare -a types=("Test de la passerelle" "Test des IP" "Test des URLs")
         declare -a categories=(hosts_gateway hosts_dns hosts_url)
 
@@ -80,7 +80,7 @@ function net-diag() {
 
 function net-edit(){
         local interface=$(ls /sys/class/net | grep -v "lo")
-        echo 'Vous voulez modifier ' $1' en' $2
+        echo 'Vous voulez modifier '$1' en' $2
         if [ $1 == "domaine" ]; then
                 echo "Le nom de domaine est modifié en $2"
                 sed -i 's/^domain.*/domain '$2'/' /etc/resolv.conf
@@ -120,14 +120,14 @@ function net-edit(){
 
 function check(){
         # Envoi d'un hash sur l'API VirusTotal
-        if [ $1 == "hash" ]; then
+        if [ "$1" == "hash" ]; then
                 local hash=$(sha256sum "$2" | awk '{print $1}')
                 curl -s --request GET \
                   --url "https://www.virustotal.com/api/v3/files/$hash" \
                   --header "x-apikey: $API_KEY_VIRUSTOTAL" | jq '.data.attributes.last_analysis_stats'
                 echo "Analyse effectuée sur virustotal.com"
         # Envoi d'un fichier sur l'API VirusTotal
-        elif [ $1 == "file" ]; then
+        elif [ "$1" == "file" ]; then
                 local file=$2
                 local reponse=$(curl -s --request POST \
                   --url "https://www.virustotal.com/api/v3/files" \
@@ -148,7 +148,7 @@ function check(){
                         echo "Erreur lors de l'envoi : $reponse"
                 fi
         # Envoi d'une IP sur l'API AbuseIPDB
-        elif [ $1 == "ip" ]; then
+        elif [ "$1" == "ip" ]; then
                 local reponse=$(curl -s -G https://api.abuseipdb.com/api/v2/check \
                   --data-urlencode "ipAddress=$2" \
                   -H "Key: $API_KEY_ABUSEIP" \
@@ -169,3 +169,85 @@ function check(){
                 echo "Usage de la commande : check [hash|file|ip] [/filepath|@IP] "
         fi
 }
+
+
+function backup(){
+        if [ "$1" == "create" ]; then
+                
+                local source="$2"
+                local destination='/backups'
+                local date=$(date +%Y-%m-%d_%Hh%M)
+                local file="backup_$date.bak"
+
+                mkdir -p "$destination"
+
+                tar -czf "$destination/$file" "$source"
+
+                echo 'Une backup du fichier '$2' a été créée dans : /backups ('$date')'
+
+        elif [ "$1" == "restore" ]; then
+                local source="$2"
+                local destination="$3"
+                tar -xzf "$source" -C "$destination"
+
+                if [ $? -eq 0 ]; then
+                        echo "La backup $source a été réstaurée dans : $destination"
+                else
+                        echo "Erreur lors de la restauration."
+                fi
+        else 
+                echo "Usage de la commande : backup [create|restore] chemin/fichier"
+        fi
+}
+
+
+function sec-audit-ssh(){
+        local config="/etc/ssh/sshd_config"
+        echo ""
+        echo "Audit de Sécurité SSH : "
+
+        # 1. Vérification du port (Standard ou Modifié)
+        local port=$(grep "^Port" "$config" | awk '{print $2}')
+        if [[ -z "$port" || "$port" == "22" ]]; then
+                echo "[!] Port SSH : 22 - (Défaut - Risque de bruteforce)"
+        else
+                echo "[V] Port SSH : $port - (Sécurisé)"
+        fi
+
+        # 2. Accès Root
+        if grep -qi "^PermitRootLogin yes" $config; then
+            echo "[!] PermitRootLogin : OUI (Dangereux)"
+        else
+            echo "[V] PermitRootLogin : NON ou restricted (Sécurisé)"
+        fi
+
+        # 3. Authentification par mot de passe
+        if grep -qi "^PasswordAuthentication no" $config; then
+            echo "[V] PasswordAuthentication : Désactivé (Sécurisé - Clés SSH requises)"
+        else
+            echo "[!] PasswordAuthentication : Activé (Moins sécurisé)"
+        fi
+
+        # 4. Authentification par clé publique
+        if grep -qi "^PubkeyAuthentication yes" $config; then
+            echo "[V] PubkeyAuthentication : Activée (Bien)"
+        else
+            echo "[!] PubkeyAuthentication : Désactivée (Attention : Clés SSH non utilisables)"
+        fi
+
+        # 5. Version du protocole SSH utilisé (Doit être 2)
+        if grep -q "^Protocol 1" $config; then
+            echo "[!] Protocole 1 activé (Obsolète et vulnérable)"
+        else
+            echo "[V] Protocole 2 uniquement (Sécurisé)"
+        fi
+
+        # 6. Max Auth Tries (Défaut 6)
+        local max_tries=$(grep "^MaxAuthTries" $config | awk '{print $2}')
+        if [[ -n "$max_tries" && "$max_tries" -le 3 ]]; then
+            echo "[V] MaxAuthTries : $max_tries (Strict - Bien)"
+        else
+            echo "[ ] MaxAuthTries : ${max_tries:-6} (Standard)"
+        fi
+}
+
